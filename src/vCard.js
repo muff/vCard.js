@@ -11,46 +11,61 @@ var vCard = function(input){
 					d.push(r(c[a]));
 				}
 			};
+			self.translate = {
+				"FN": "name"
+			};
 			self.listenFor = {
-				"VERSION": function(line){
-					return line[2];
+				"VERSION FN URL ORG TITLE": function(match){
+					return  {
+						key: self.translate[match[1]] || match[1],
+						value: match[2]
+					};
 				},
-				"FN": function(line){
-					return  line[2];
-				},
-				"ORG": function  (line) {
-					return  line[2];
-				},
-				"TITLE": function (line) {
-					return line[2];
-				},
-				
+				"ADR": function (match) {
+					var ad = match[3].split('type=pref:;');
+					return {
+						key: 'adr',
+						value: ad.toString().split(';')
+					};
+				}
 			};
 			self.readCard = function(card){
-				var d = card.split('\n'),
-				a, b, m, c = {}, l = self.listenFor;
+				var line = card.split('\n'),
+					a, // line iterator
+					b, // expression iterator
+					c, // listen iterator
+					m, // current match
+					r, // current translation results
+					d = {}, // for storing data
+					l = self.listenFor;
 
-				var r = {
+				var x = {
 					'simple': /^(version|fn|title|org)\:(.+)$/i,
-					'complex': /^([^\:\;]+);([^\:]+)\:(.+)$/,
-					'key': /item\d{1,2}\./,
-					'properties': /((type=)?(.+);?)+/
-				};				
-				for(a in d ){
-					c[a] = {};
-					for(b in r){						
-						m = d[a].match(r[b]);
-
-						if(m && m.length){							
-							console.log(m);
-							if(l[m[1]] && !c[a][m[1]]){
-								c[a][m[1]] = l[m[1]](m);								
+					'items': /^item\d{1,2}\.(.*?)[;:]type=(.*?);(.*?)$/i
+//					'itm': /^item\d{1,2}\.(.*?)[;:](.*?)$/i
+//					'complex': /^([^\:\;]+);([^\:]+)\:(.+)$/,
+//					'key': /item\d{1,2}\./,
+//					'properties': /((type=)?(.+);?)+/
+				};
+				lineloop: for(a in line){
+					//console.log(line[a]);
+					for(b in x){
+						m = line[a].match(x[b]);
+						if(m && m.length){	
+							//console.log(m);						
+							for(c in l){								
+								if(c.match && c.match(m[1])){
+									r = l[c](m);
+									console.log(c, c.match(m[1]), r);
+									d[r.key] = r.value;
+									continue lineloop;
+								}
 							}
 						}
 					}
 				}
-				console.log(c);
-				return c;
+				console.log(d);
+				return d;
 			};
 			self.parse(input);
 	return self;

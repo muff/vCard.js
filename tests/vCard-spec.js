@@ -24,6 +24,5 @@ buster.testCase("vCard Parsing", {
 		var item = this.vCard.data[0];
 		assert.isObject(item);
 		assert(item.name);
-
 	}
 });
