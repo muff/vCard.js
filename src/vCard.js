@@ -27,6 +27,12 @@ var vCard = function(input){
 						key: 'adr',
 						value: ad.toString().split(';')
 					};
+				},
+				"twitter facebook linkedin github":function(match){
+					return {
+						key: match[1],
+						value: match[2]
+					}
 				}
 			};
 			self.readCard = function(card){
@@ -40,15 +46,16 @@ var vCard = function(input){
 					l = self.listenFor;
 
 				var x = {
-					'simple': /^(version|fn|title|org)\:(.+)$/i,
-					'items': /^item\d{1,2}\.(.*?)[;:]type=(.*?);(.*?)$/i
-//					'itm': /^item\d{1,2}\.(.*?)[;:](.*?)$/i
+					'simple': /^(version|fn|title|org)\:(.+)$/i
+,					'items': /^item\d{1,2}\.(.*?)[;:]type=(.*?);(.*?)$/i
+,					'itm': /^item\d{1,2}\.(.*?)[;:](.*?)$/i
+,					'networks': /^X-SOCIALPROFILE;type=(.*?):(.*?)$/i
 //					'complex': /^([^\:\;]+);([^\:]+)\:(.+)$/,
 //					'key': /item\d{1,2}\./,
 //					'properties': /((type=)?(.+);?)+/
 				};
 				lineloop: for(a in line){
-					//console.log(line[a]);
+					console.log(line[a]);
 					for(b in x){
 						m = line[a].match(x[b]);
 						if(m && m.length){	
